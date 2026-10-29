@@ -1,0 +1,73 @@
+---
+layout: runbook
+title: '#4471 split · three problems, not one'
+owner: fzimnal
+status: proposed
+reviewed: 2026-10-29
+signature: v1.eyJzdWIiOiI0NzY2IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMzMTM4OTYsImV4cCI6MTc5MzQwMDI5Nn0.gT_XwaX2b_0KkC9axRt2i51ujd2tB4MbLekj042xYX8
+---
+
+<script>
+  import SplitTable from '#lib/kb/SplitTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const issues = {
+    parser: 'https://github.com/fzimnal/support-kb-4471/issues/1',
+    hint: 'https://github.com/fzimnal/support-kb-4471/issues/2',
+    shift: 'https://github.com/fzimnal/support-kb-4471/issues/3',
+  };
+</script>
+
+[#4471](/kb/incidents/4471) says one issue, one fix queued. Its reports say otherwise. The ticket
+holds three problems with three different fixes, and the queued parser fix closes only one of
+them.
+
+<Callout kind="warn">
+Not known. Three problems, one fix queued. Each now has a ticket of its own.
+</Callout>
+
+## What #4471 holds
+
+<SplitTable ticket={4471} {issues} />
+
+Every count is built from `reports-4471.json` at render time, one report per id: the export
+repeats some reports across its overlapping pages.
+
+## The three problems
+
+**`parser`: the shared parser reads every date month first.** Our tenants all write the day
+first. Their dates come out with day and month swapped: booked for 2 December, invite for
+12 February. It reaches every channel: app, email, and the booking-v2 form. This is the bug
+#4471 names, and the fix that is queued.
+
+**`hint`: booking-v3 prints `MM/DD/YYYY` under its date field.** People type what the hint tells
+them, month first, and the form reads it the tenant's way, day first. The result looks the same
+as `parser`, so it was merged, but it only happens on the form, only for tenants on booking-v3,
+and the parser fix does not touch it. The fix is the hint (or the form's reading), not the
+parser.
+
+**`shift`: a date moves by one day.** Not a swap. "Client in Lisbon got Tuesday. Client in
+Toronto got Monday." "Every booking in June is one day off." An invite that arrived before the
+booking. The desk already read these as a one-day move (`desk-notes.json`), but the cause table
+on #4471 still counts them under `parser` by tenant. It looks like a time-zone or DST conversion,
+and no fix for it is queued.
+
+## How to tell them apart
+
+1. Does the report give two dates that are each other with day and month swapped? If not, and
+   the date moved by a day, it is `shift`.
+2. A swap that came in through the booking form of a booking-v3 tenant is `hint`.
+3. Every other swap from a day-first tenant is `parser`.
+
+Ask the tenant, not intake. Intake's tag is a guess from the reporter's browser, and on #4471 it
+disagrees with the tenant in both directions; the table shows by how much.
+
+## What went wrong
+
+[Decision 0001](/kb/decisions/0001-dedupe-by-subject) merges on subject, and every one of these
+reports says "wrong date" in some form. Same symptom, different causes. The
+[cause table](/kb/incidents/4471) already computes `hint` apart from `parser` and marks it
+"no ticket of its own"; the page above it still says one issue.
+
+<RenderStamp {signature} />
