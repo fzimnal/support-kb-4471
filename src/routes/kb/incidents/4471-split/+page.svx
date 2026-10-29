@@ -2,7 +2,7 @@
 layout: runbook
 title: '#4471 split · three problems, not one'
 owner: fzimnal
-status: proposed
+status: open
 reviewed: 2026-10-29
 signature: v1.eyJzdWIiOiI0NzY2IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMzMTM4OTYsImV4cCI6MTc5MzQwMDI5Nn0.gT_XwaX2b_0KkC9axRt2i51ujd2tB4MbLekj042xYX8
 ---
@@ -19,39 +19,49 @@ signature: v1.eyJzdWIiOiI0NzY2IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYX
   };
 </script>
 
-[#4471](/kb/incidents/4471) says one issue, one fix queued. Its reports say otherwise. The ticket
-holds three problems with three different fixes, and the queued parser fix closes only one of
-them.
+[#4471](/kb/incidents/4471) said one issue, one fix queued. Its reports say otherwise. The ticket
+held three problems with three different fixes, and the parser fix closed only one of them.
 
 <Callout kind="warn">
-Not known. Three problems, one fix queued. Each now has a ticket of its own.
+#4471 is closed, but not everything in it is. <code>parser</code> is fixed. <code>hint</code> won't
+be fixed: its form is retired. <code>shift</code> has no fix and is still open.
 </Callout>
+
+## Where each problem stands
+
+Engineering closed #4471 on 5 October.
+
+- **`parser` · fixed.** `fix(dates): parse dd/mm for eu locales`. [Ticket](https://github.com/fzimnal/support-kb-4471/issues/1) closed.
+- **`hint` · won't fix.** The booking-v3 form is retired, so its hint goes with it. [Ticket](https://github.com/fzimnal/support-kb-4471/issues/2) closed as not planned.
+- **`shift` · open.** Not part of the parser fix, and not in engineering's update. A one-day
+  move is not a day/month swap, so parsing dd/mm does not touch it. [Ticket](https://github.com/fzimnal/support-kb-4471/issues/3) stays open until engineering takes it.
 
 ## What #4471 holds
 
 <SplitTable ticket={4471} {issues} />
 
 Every count is built from `reports-4471.json` at render time, one report per id: the export
-repeats some reports across its overlapping pages.
+repeats some reports across its overlapping pages. The desk's own cause table on #4471 files the
+`shift` reports under `parser` by tenant and footnotes them; the `parser` ticket carries the
+desk's count, so it includes them.
 
 ## The three problems
 
 **`parser`: the shared parser reads every date month first.** Our tenants all write the day
 first. Their dates come out with day and month swapped: booked for 2 December, invite for
 12 February. It reaches every channel: app, email, and the booking-v2 form. This is the bug
-#4471 names, and the fix that is queued.
+#4471 names, and the one engineering fixed.
 
 **`hint`: booking-v3 prints `MM/DD/YYYY` under its date field.** People type what the hint tells
 them, month first, and the form reads it the tenant's way, day first. The result looks the same
 as `parser`, so it was merged, but it only happens on the form, only for tenants on booking-v3,
-and the parser fix does not touch it. The fix is the hint (or the form's reading), not the
-parser.
+and the parser fix does not touch it. Retiring the form ends it.
 
 **`shift`: a date moves by one day.** Not a swap. "Client in Lisbon got Tuesday. Client in
 Toronto got Monday." "Every booking in June is one day off." An invite that arrived before the
 booking. The desk already read these as a one-day move (`desk-notes.json`), but the cause table
 on #4471 still counts them under `parser` by tenant. It looks like a time-zone or DST conversion,
-and no fix for it is queued.
+and no fix for it is queued. Closing #4471 did not close it: expect more of these.
 
 ## How to tell them apart
 

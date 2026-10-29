@@ -35,7 +35,7 @@
         <td class="small">{rows(g.taggedAs)}</td>
         <td>{g.tenants.length}</td>
         <td class="small">{g.firstSeen} → {g.lastSeen}</td>
-        <td>{#if issues[g.problem]}<a href={issues[g.problem]}>open</a>{:else}<span class="none">none yet</span>{/if}</td>
+        <td>{#if issues[g.problem]}<a href={issues[g.problem]}>#{issues[g.problem]?.split('/').pop()}</a>{:else}<span class="none">none yet</span>{/if}</td>
       </tr>
     {/each}
   </tbody>
